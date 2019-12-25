@@ -15,15 +15,31 @@
 #include <linux/mutex.h>
 
 static struct nf_hook_ops nfho;
+static DEFINE_MUTEX(lock);
+unsigned* junk;
 
 unsigned int hook_funcion(void *priv, struct sk_buff *skb, const struct nf_hook_state *state)
 {
+	int i, j;
+	printk("try to lock.\n");
+	mutex_lock(&lock);
+	printk("locked.\n");
+	printk("counting.\n");
+	for(j = 0; j < 100; j++)
+		for(i = 0; i < 1000; i++)
+			junk[i]++;
+	printk("count finish.\n");
+	printk("try to unlock.\n");
+	mutex_unlock(&lock);
+	printk("unlocked.\n");
 	return NF_ACCEPT;
 }
 
 static int __init hook_init(void)
 {
 	int ret;
+	mutex_init(&lock);
+	junk = kmalloc(1000 * sizeof(unsigned), GFP_KERNEL);
 
 	nfho.hook = hook_funcion;
 	nfho.pf = NFPROTO_IPV4;
@@ -46,6 +62,8 @@ static void __exit hook_exit(void)
 #else
     nf_unregister_hook(&nfho);
 #endif
+	kfree(junk);
+	mutex_destroy(&lock);
 }
 
 module_init(hook_init);
