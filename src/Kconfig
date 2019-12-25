@@ -1,0 +1,2 @@
+config BBP_DEBUG
+	tristate "bbp-debug"

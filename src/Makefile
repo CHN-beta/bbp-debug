@@ -1,0 +1,1 @@
+obj-${CONFIG_BBP_DEBUG}	+= bbp-debug.o
